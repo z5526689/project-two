@@ -195,7 +195,7 @@ def mk_prc_df(tickers, prc_col='adj_close'):
             df_ticker = df[[prc_col]].rename(columns={prc_col: ticker.lower()})
             dfs.append(df_ticker)
         dff = pd.concat(dfs, axis=1)
-        return dff
+    return dff
     
 
   
@@ -273,7 +273,11 @@ def mk_ret_df(prc_df):
 
     """
     # <COMPLETE THIS PART>
+    df_mkt = pd.read_csv(os.path.join(cfg.FF_CSV), parse_dates=['Date'], index_col='Date')
+    stock_returns = prc_df.pct_change()
+    df = stock_returns.join(df_mkt[['mkt']], how='left')
 
+    return df
 
 
 

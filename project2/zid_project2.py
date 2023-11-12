@@ -81,7 +81,12 @@ def read_prc_csv(tic):
        'aaa.csv' are different files). 
 
     """
-    # <COMPLETE THIS PART>
+    file_name = f"{tic.lower()}_prc.csv"
+    df = pd.read_csv(file_name)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df.set_index('Date', inplace=True)
+    df.columns = standardise_colnames(df.columns)
+    return df
 
 
 
@@ -182,11 +187,18 @@ def mk_prc_df(tickers, prc_col='adj_close'):
         ...               ...    ...
         2010-12-30   9.988830  5.300
         2010-12-31   9.954883  5.326
+        """
+    dfs = []
+    for ticker in tickers:
+        df = read_prc_csv(ticker)
+        if prc_col in df.columns:
+            df_ticker = df[[prc_col]].rename(columns={prc_col: ticker.lower()})
+            dfs.append(df_ticker)
+        dff = pd.concat(dfs, axis=1)
+        return dff
+    
 
-
-    """
-    # <COMPLETE THIS PART>
-
+  
 
 
 

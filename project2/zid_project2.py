@@ -398,7 +398,7 @@ def get_avg(df, col, year):
 
     """
     #<COMPLETE THIS PART>
-
+    return df[df.index.year == year][col].mean()
 
 
 def get_ew_rets(df, tickers):
@@ -443,7 +443,9 @@ def get_ew_rets(df, tickers):
 
     """
     #<COMPLETE THIS PART>
-
+    ticker_value = df[tickers]
+    ew_rets = ticker_value.mean(axis=1) / len(tickers)
+    return ew_rets
 
 
 def get_ann_ret(ser, start, end):
@@ -489,7 +491,13 @@ def get_ann_ret(ser, start, end):
 
     """
     # <COMPLETE THIS PART>
-
+    start_date = pd.to_datetime(start)
+    end_date = pd.to_datetime(end)
+    ser1 = ser[start_date:end_date]
+    tot_ret = (ser1 + 1).prod() - 1
+    N = ser1.count()
+    annualised_return = (tot_ret)**(252/N) - 1
+    return annualised_return
 
 # ----------------------------------------------------------------------------
 # Part 8: Answer the following questions

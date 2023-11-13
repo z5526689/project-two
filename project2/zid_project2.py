@@ -532,23 +532,23 @@ def get_ann_ret(ser, start, end):
 #     year 2020 (ignoring missing values)? The sample should include all tickers
 #     included in the dictionary config.TICMAP. Your answer should include the
 #     ticker for this stock.
-Q1_ANSWER = '?'
+Q1_ANSWER = 'TSLA'
 
 
 # Q2: What is the annualised return for the EW portfolio of all your stocks in
 # the config.TICMAP dictionary from the beginning of 2010 to the end of 2020?
-Q2_ANSWER = '?'
+Q2_ANSWER = '0.2044'
 
 # Q3: What is the annualised daily return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question above)?
-Q3_ANSWER = '?'
+Q3_ANSWER = '0.5211'
 
 # Q4: What is the annualised daily ABNORMAL return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question Q1 above)? Abnormal returns are calculated by subtracting
 # the market return ("mkt") from the individual stock return.
-Q4_ANSWER = '?'
+Q4_ANSWER = '0.3573'
     
 
 

@@ -20,8 +20,9 @@ import pandas as pd
 # Create an import statement so that the module config.py (inside the project2 
 # package) is imported as "cfg"
 # Note: This module should be imported as cfg
-from project2 import config as cfg
-
+#
+# <COMPLETE THIS PART>
+import config as cfg
 
 
 # ---------------------------------------------------------------------------- 
@@ -81,13 +82,18 @@ def read_prc_csv(tic):
        'aaa.csv' are different files). 
 
     """
-    file_name = f"{tic.lower()}_prc.csv"
-    df = pd.read_csv(file_name)
-    df['Date'] = pd.to_datetime(df['Date'])
-    df.set_index('Date', inplace=True)
-    df.columns = standardise_colnames(df.columns)
-    return df
+    # <COMPLETE THIS PART>
+    # Convert stock symbol to lowercase to match filename
+    file_path = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
 
+    # Read the CSV file, parse the 'Date' column as a date, and set it as an index
+    df_file = pd.read_csv(file_path, index_col='Date', parse_dates=True)
+
+    # Use the standardise_colname function in the configuration object to standardize column names
+    df_colname = cfg.standardise_colnames(df_file)
+
+    # Sort the data frame by date index and return the result
+    return df_colname.sort_index()
 
 
 
@@ -187,18 +193,26 @@ def mk_prc_df(tickers, prc_col='adj_close'):
         ...               ...    ...
         2010-12-30   9.988830  5.300
         2010-12-31   9.954883  5.326
-        """
-    dfs = []
-    for ticker in tickers:
-        df = read_prc_csv(ticker)
-        if prc_col in df.columns:
-            df_ticker = df[[prc_col]].rename(columns={prc_col: ticker.lower()})
-            dfs.append(df_ticker)
-        dff = pd.concat(dfs, axis=1)
-    return dff
-    
 
-  
+
+    """
+    # <COMPLETE THIS PART>
+    # Read the price data for each stock ticker
+    df_alls = pd.DataFrame()
+    for tic in tickers:
+        # Add the specified price column to the combined DataFrame
+        # Use the lowercase of the stock ticker as the name of the new column
+        df = read_prc_csv(tic)
+        df_alls[tic.lower()] = df[prc_col]
+
+    # Reset the DataFrame's index
+    # Missing data for dates will be automatically filled with NaN
+    df_alls = df_alls.reindex(pd.date_range(df_alls.index.min(), df_alls.index.max()))
+
+    # Remove rows where all columns are NaN
+    df_alls.dropna(how='all', inplace=True)
+
+    return df_alls
 
 
 
@@ -273,11 +287,17 @@ def mk_ret_df(prc_df):
 
     """
     # <COMPLETE THIS PART>
-    df_mkt = pd.read_csv(os.path.join(cfg.FF_CSV), parse_dates=['Date'], index_col='Date')
-    stock_returns = prc_df.pct_change()
-    df = stock_returns.join(df_mkt[['mkt']], how='left')
+    # Calculate stock returns: Calculate the percent change in each column (per stock) using the pct_change method
+    df_ret = prc_df.pct_change()
 
-    return df
+
+    # Read market return data and set 'Date' column as index
+    df_mkt = pd.read_csv(cfg.FF_CSV, index_col='Date', parse_dates=True)
+
+    # Merge market return data into stock returns DataFrame
+    df_ret = df_ret.join(df_mkt['mkt'], how='inner')
+
+    return df_ret
 
 
 
@@ -345,12 +365,12 @@ def mk_aret_df(ret_df):
     
     """
     # <COMPLETE THIS PART>
-    
     aret_df=pd.DataFrame()
     for i in ret_df.columns:
+        # For each column (individual stock returns), calculate the difference from the market return ('mkt' column)
         aret_df[i]=ret_df[i]-ret_df['mkt']
+    #All rows and all columns except the last column are selected
     return aret_df.iloc[:,:-1]
-
 
 
 # ---------------------------------------------------------------------------- 
@@ -448,8 +468,9 @@ def get_ew_rets(df, tickers):
 
     """
     #<COMPLETE THIS PART>
-    ticker_value = df[tickers]
-    ew_rets = ticker_value.mean(axis=1) / len(tickers)
+    ticker_values = df.loc[:,tickers]
+    ticker_values.dropna(how ='all', inplace=True)
+    ew_rets = ticker_values.mean(axis=1, skipna = True)
     return ew_rets
 
 
@@ -499,7 +520,8 @@ def get_ann_ret(ser, start, end):
     start_date = pd.to_datetime(start)
     end_date = pd.to_datetime(end)
     ser1 = ser[start_date:end_date]
-    tot_ret = (ser1 + 1).prod() - 1
+    ser1 = ser1.add(1, fill_value=None)
+    tot_ret = ser1.prod()
     N = ser1.count()
     annualised_return = (tot_ret)**(252/N) - 1
     return annualised_return
@@ -537,7 +559,7 @@ def get_ann_ret(ser, start, end):
 #     year 2020 (ignoring missing values)? The sample should include all tickers
 #     included in the dictionary config.TICMAP. Your answer should include the
 #     ticker for this stock.
-Q1_ANSWER = 'TSLA'
+Q1_ANSWER = 'tsla'
 
 
 # Q2: What is the annualised return for the EW portfolio of all your stocks in
@@ -547,13 +569,13 @@ Q2_ANSWER = '0.2044'
 # Q3: What is the annualised daily return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question above)?
-Q3_ANSWER = '0.5211'
+Q3_ANSWER = '0.5516'
 
 # Q4: What is the annualised daily ABNORMAL return for the period from 2010 to 2020 for
 # the stock with the highest average return in 2020 (the one you identified in
 # the first question Q1 above)? Abnormal returns are calculated by subtracting
 # the market return ("mkt") from the individual stock return.
-Q4_ANSWER = '0.3573'
+Q4_ANSWER = '0.3771'
     
 
 
@@ -976,11 +998,11 @@ if __name__ == "__main__":
     #_test_cfg()
     #_test_read_prc_csv()
     #_test_mk_prc_df()
-    #_test_mk_ret_df()
-    #_test_mk_aret_df()
-    #_test_get_avg()
-    #_test_get_ew_rets()
-    #_test_get_ann_ret()
+    # _test_mk_ret_df()
+    # _test_mk_aret_df()
+    # _test_get_avg()
+    # _test_get_ew_rets()
+    _test_get_ann_ret()
 
 
 

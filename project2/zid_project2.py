@@ -345,7 +345,10 @@ def mk_aret_df(ret_df):
     
     """
     # <COMPLETE THIS PART>
-
+    aret_df=pd.DataFrame()
+    for i in ret_df.columns:
+        aret_df[i]=ret_df[i]-ret_df['mkt']
+    return aret_df.iloc[:,:-1]
 
 
 # ---------------------------------------------------------------------------- 

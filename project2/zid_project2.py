@@ -83,16 +83,9 @@ def read_prc_csv(tic):
 
     """
     # <COMPLETE THIS PART>
-    # Convert stock symbol to lowercase to match filename
     file_path = os.path.join(cfg.DATADIR, f"{tic.lower()}_prc.csv")
-
-    # Read the CSV file, parse the 'Date' column as a date, and set it as an index
     df_file = pd.read_csv(file_path, index_col='Date', parse_dates=True)
-
-    # Use the standardise_colname function in the configuration object to standardize column names
     df_colname = cfg.standardise_colnames(df_file)
-
-    # Sort the data frame by date index and return the result
     return df_colname.sort_index()
 
 
@@ -197,21 +190,14 @@ def mk_prc_df(tickers, prc_col='adj_close'):
 
     """
     # <COMPLETE THIS PART>
-    # Read the price data for each stock ticker
     df_alls = pd.DataFrame()
     for tic in tickers:
         # Add the specified price column to the combined DataFrame
         # Use the lowercase of the stock ticker as the name of the new column
         df = read_prc_csv(tic)
         df_alls[tic.lower()] = df[prc_col]
-
-    # Reset the DataFrame's index
-    # Missing data for dates will be automatically filled with NaN
     df_alls = df_alls.reindex(pd.date_range(df_alls.index.min(), df_alls.index.max()))
-
-    # Remove rows where all columns are NaN
     df_alls.dropna(how='all', inplace=True)
-
     return df_alls
 
 
@@ -287,16 +273,9 @@ def mk_ret_df(prc_df):
 
     """
     # <COMPLETE THIS PART>
-    # Calculate stock returns: Calculate the percent change in each column (per stock) using the pct_change method
     df_ret = prc_df.pct_change()
-
-
-    # Read market return data and set 'Date' column as index
     df_mkt = pd.read_csv(cfg.FF_CSV, index_col='Date', parse_dates=True)
-
-    # Merge market return data into stock returns DataFrame
     df_ret = df_ret.join(df_mkt['mkt'], how='inner')
-
     return df_ret
 
 
@@ -369,7 +348,6 @@ def mk_aret_df(ret_df):
     for i in ret_df.columns:
         # For each column (individual stock returns), calculate the difference from the market return ('mkt' column)
         aret_df[i]=ret_df[i]-ret_df['mkt']
-    #All rows and all columns except the last column are selected
     return aret_df.iloc[:,:-1]
 
 
